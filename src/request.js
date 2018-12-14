@@ -57,6 +57,9 @@
             paramData = paramData || {};
 
             var namespace = '';
+            if (paramData.namespace === 'tns') {
+              paramData.namespace = 'sch';
+            }
             if (paramData) {
                 if (paramData.namespace) {
                     namespace = paramData.namespace + ':';
@@ -110,11 +113,9 @@
         return wsdlrdr.getMethodParamsByName(callParams.method, baseParamsToRequestParams(baseParams), opts)
             .then((methodParams) => {
                 var requestParams = methodParams.request;
-
                 if (!callParams.params.hasOwnProperty(callParams.method)) {
                     var topObject = {};
                     topObject[callParams.method] = callParams.params;
-
                     callParams.params = topObject;
                 }
 
@@ -124,14 +125,12 @@
                         if (!methodRequestParams) {
                             methodRequestParams = _.findWhere(requestParams, { 'name': paramName });
                         }
-
                         return getParamAsString(paramValue, paramName,
                             methodRequestParams,
                             callParams.attributes
                         );
                     }
                 );
-
                 return result.join('');
             });
     }
@@ -158,11 +157,13 @@
 
                 // var soap = _.findWhere(namespaces, { 'short': 'soap' });
                 var xsd = _.findWhere(namespaces, { 'short': 'xsd' }) || {};
-
                 return {
                     'soap_env'  : 'http://schemas.xmlsoap.org/soap/envelope/',
                     'xml_schema': xsd.full || 'http://www.w3.org/2001/XMLSchema',
-                    'namespaces': namespaces
+                    'namespaces': [{
+                      short: 'sch',
+                      full: 'http://www.kareo.com/api/schemas/'
+                    }]
                 };
             });
     }
@@ -208,15 +209,15 @@
         const $namespaces = envelope.namespaces.map((namespace) => `xmlns:${namespace.short}="${namespace.full}"`);
         const $namespacesAsString = $namespaces.join(' ');
 
-        const $head = (head !== null) ? `<SOAP-ENV:Header>${head.map((headItem) => headItem)}</SOAP-ENV:Header>` : '';
-        const $body = `<SOAP-ENV:Body>${body}</SOAP-ENV:Body>`;
+        const $head = (head !== null) ? `<soapenv:Header>${head.map((headItem) => headItem)}</soapenv:Header>` : '';
+        const $body = `<soapenv:Body>${body}</soapenv:Body>`;
 
-        const $soapEnvelope = `<SOAP-ENV:Envelope
-            xmlns:SOAP-ENV="${envelope.soap_env}"
+        const $soapEnvelope = `<soapenv:Envelope
+            xmlns:soapenv="${envelope.soap_env}"
             ${$namespacesAsString}>
             ${$head}
             ${$body}
-        </SOAP-ENV:Envelope>`;
+        </soapenv:Envelope>`;
 
         return `<?xml version="1.0" encoding="UTF-8"?>${$soapEnvelope}`;
     };
@@ -234,7 +235,7 @@
                 self._headers = params.headers;
             }
         }
-
+        this._headers['SOAPAction'] = `${this._params.actionUrl}${params.method}`;
         const requestXml = await self.getRequestXml(params, this._params, this._opts);
         const result = await asyncRequest({
             url               : this._url,
