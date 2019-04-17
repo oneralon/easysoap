@@ -165,7 +165,7 @@
                       full: 'http://www.kareo.com/api/schemas/'
                     }, {
                       short: 'sch1',
-                      full: 'http://www.kareo.com/api/schemas/'
+                      full: 'http://www.kareo.com/api/schemas'
                     }]
                 };
             });
