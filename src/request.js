@@ -163,6 +163,9 @@
                     'namespaces': [{
                       short: 'sch',
                       full: 'http://www.kareo.com/api/schemas/'
+                    }, {
+                      short: 'sch1',
+                      full: 'http://www.kareo.com/api/schemas/'
                     }]
                 };
             });
