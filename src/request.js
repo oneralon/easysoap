@@ -245,7 +245,8 @@
             body              : requestXml,
             headers           : this._headers,
             rejectUnauthorized: this._params.rejectUnauthorized,
-            method            : 'POST'
+            method            : 'POST',
+            timeout           : this._params.timeout,
         });
 
         return {
